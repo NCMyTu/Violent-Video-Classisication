@@ -1,5 +1,3 @@
-const BATCH_SIZE = 32;
-
 function switchContent(contentId) 
 {
     var contentDivs = document.querySelectorAll('.content');
@@ -21,19 +19,45 @@ function connectToCCTV() {
         imgElement.src = url;
         imgElement.style.display = 'block';
         cctvContainer.style.display = 'flex';
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
         setInterval(() => {
+            canvas.width = imgElement.width;
+            canvas.height = imgElement.height;
+            context.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+
+            const frameData = canvas.toDataURL('image/jpeg').split(',')[1];
+
             fetch('/cctv_infer', {
                 method: 'POST',
-                body: JSON.stringify({ cctv_url: url }),
+                body: JSON.stringify({
+                    frame: frameData,
+                    width: canvas.width,
+                    height: canvas.height
+                }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.text())  // the response is a string
-            .then(data => {
-                detectionInfo.innerHTML += `<p>${data}</p>`;
-            })
-            .catch(error => console.error(error));
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error(data.error);
+                        return;
+                    }
+
+                    if (data.results) {
+                        detectionInfo.innerHTML = '';
+                        data.results.forEach(result => {
+                            detectionInfo.innerHTML += `<p>Frame ${result.frame_id}: BBox ${result.bbox}, Conf ${result.confidence}</p>`;
+                        });
+                    } else {
+                        detectionInfo.innerHTML = `<p>${data.message}</p>`;
+                    }
+                })
+                .catch(error => console.error(error));
         }, 62);
     } else {
         alert('Please enter a valid CCTV URL!');
