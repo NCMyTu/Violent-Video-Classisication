@@ -47,11 +47,12 @@ def process_frame():
     if frame is None:
         return jsonify({"error": "Frame could not be decoded"}), 400
 
-    detection_result = detect_objects_in_frame(frame)
+    detection_result = detect(frame)
     return jsonify({"result": detection_result})
 
-def detect_objects_in_frame(frame):
-    return "\nDetected objects in single frame 1"
+def detect(frame):
+    # placeholder for later logic
+    return "Detected objects in frame"
 
 
 if __name__ == '__main__':

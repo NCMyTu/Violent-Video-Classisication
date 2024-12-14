@@ -12,13 +12,15 @@ function switchContent(contentId)
     selectedContent.style.display = 'block';
 }
 
-function connectToCCTV() {
+function connectToCCTV() 
+{
     const url = document.getElementById('textbox').value.trim();
     const imgElement = document.getElementById('cctv-stream');
     const cctvContainer = document.querySelector('.cctv-container');
     const detectionInfo = document.querySelector('.detection-info p');
 
-    if (url) {
+    if (url) 
+    {
         imgElement.src = url;
         imgElement.style.display = 'block';
         cctvContainer.style.display = 'flex';
@@ -27,9 +29,6 @@ function connectToCCTV() {
             fetch(url)
                 .then((response) => response.blob())
                 .then((blob) => {
-                    const objectURL = URL.createObjectURL(blob);
-                    imgElement.src = objectURL;
-
                     const formData = new FormData();
                     formData.append('frame', blob, 'frame.jpg');
                     
@@ -39,12 +38,9 @@ function connectToCCTV() {
                     })
                     .then((response) => response.json())
                     .then((data) => {
-                        if (data.result) 
-                        {
+                        if (data.result) {
                             detectionInfo.innerHTML += `<br>${data.result}`;
-                        } 
-                        else if (data.error) 
-                        {
+                        } else if (data.error) {
                             detectionInfo.innerHTML += `<br>Error: ${data.error}`;
                         }
                     });
@@ -59,11 +55,13 @@ function connectToCCTV() {
     }
 }
 
-function processFrame() {
+function processFrame() 
+{
     const imgElement = document.getElementById('cctv-stream');
     const detectionInfo = document.querySelector('.detection-info p');
 
-    if (!imgElement.src) {
+    if (!imgElement.src) 
+    {
         alert('No frame available to process!');
         return;
     }
@@ -77,11 +75,17 @@ function processFrame() {
     })
     .then((response) => response.json())
     .then((data) => {
-        if (data.result) {
+        if (data.result) 
+        {
             detectionInfo.innerHTML += `<br>${data.result}`;
-        } else if (data.error) {
+        } else if (data.error) 
+        {
             detectionInfo.innerHTML += `<br>Error: ${data.error}`;
         }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error); // Debugging
+        detectionInfo.innerHTML += `<br>Error: ${error}`;
     });
 }
 
