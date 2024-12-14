@@ -1,4 +1,3 @@
-let frameBatch = [];
 const BATCH_SIZE = 32;
 
 function switchContent(contentId) 
@@ -12,81 +11,35 @@ function switchContent(contentId)
     selectedContent.style.display = 'block';
 }
 
-function connectToCCTV() 
-{
+function connectToCCTV() {
     const url = document.getElementById('textbox').value.trim();
     const imgElement = document.getElementById('cctv-stream');
     const cctvContainer = document.querySelector('.cctv-container');
     const detectionInfo = document.querySelector('.detection-info p');
 
-    if (url) 
-    {
+    if (url) {
         imgElement.src = url;
         imgElement.style.display = 'block';
         cctvContainer.style.display = 'flex';
-
         setInterval(() => {
-            fetch(url)
-                .then((response) => response.blob())
-                .then((blob) => {
-                    const formData = new FormData();
-                    formData.append('frame', blob, 'frame.jpg');
-                    
-                    fetch('/process_frame', {
-                        method: 'POST',
-                        body: formData,
-                    })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.result) {
-                            detectionInfo.innerHTML += `<br>${data.result}`;
-                        } else if (data.error) {
-                            detectionInfo.innerHTML += `<br>Error: ${data.error}`;
-                        }
-                    });
-                });
+            fetch('/cctv_infer', {
+                method: 'POST',
+                body: JSON.stringify({ cctv_url: url }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.text())  // the response is a string
+            .then(data => {
+                detectionInfo.innerHTML += `<p>${data}</p>`;
+            })
+            .catch(error => console.error(error));
         }, 62);
-    } 
-    else 
-    {
+    } else {
         alert('Please enter a valid CCTV URL!');
         imgElement.style.display = 'none';
         cctvContainer.style.display = 'none';
     }
-}
-
-function processFrame() 
-{
-    const imgElement = document.getElementById('cctv-stream');
-    const detectionInfo = document.querySelector('.detection-info p');
-
-    if (!imgElement.src) 
-    {
-        alert('No frame available to process!');
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('frame', imgElement.src);
-
-    fetch('/process_frame', {
-        method: 'POST',
-        body: formData,
-    })
-    .then((response) => response.json())
-    .then((data) => {
-        if (data.result) 
-        {
-            detectionInfo.innerHTML += `<br>${data.result}`;
-        } else if (data.error) 
-        {
-            detectionInfo.innerHTML += `<br>Error: ${data.error}`;
-        }
-    })
-    .catch(error => {
-        console.error('Fetch error:', error); // Debugging
-        detectionInfo.innerHTML += `<br>Error: ${error}`;
-    });
 }
 
 function uploadVideo() 

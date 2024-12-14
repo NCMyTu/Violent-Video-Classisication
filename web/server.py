@@ -5,12 +5,11 @@ import requests
 from io import BytesIO
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 
+UPLOAD_FOLDER = './static/uploads'
 BATCH_SIZE = 32
 
 app = Flask(__name__)
-UPLOAD_FOLDER = './static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/')
@@ -35,24 +34,10 @@ def upload_file():
         "video_url": url_for('static', filename=f'uploads/{filename}')
     })
 
-@app.route('/process_frame', methods=['POST'])
-def process_frame():
-    file = request.files.get('frame')
-    if not file:
-        return jsonify({"error": "No frame provided"}), 400
-
-    frame_array = np.frombuffer(file.read(), np.uint8)
-    frame = cv2.imdecode(frame_array, cv2.IMREAD_COLOR)
-
-    if frame is None:
-        return jsonify({"error": "Frame could not be decoded"}), 400
-
-    detection_result = detect(frame)
-    return jsonify({"result": detection_result})
-
-def detect(frame):
-    # placeholder for later logic
-    return "Detected objects in frame"
+@app.route('/cctv_infer', methods=['POST'])
+def cctv_infer():
+    result = "detected (x, y), conf: 0.95"
+    return result
 
 
 if __name__ == '__main__':
