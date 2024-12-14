@@ -1,14 +1,3 @@
-function switchContent(contentId) 
-{
-    var contentDivs = document.querySelectorAll('.content');
-    contentDivs.forEach(function(div) 
-    {
-        div.style.display = 'none';
-    });
-    var selectedContent = document.getElementById(contentId);
-    selectedContent.style.display = 'block';
-}
-
 function connectToCCTV() {
     const url = document.getElementById('textbox').value.trim();
     const imgElement = document.getElementById('cctv-stream');
@@ -20,50 +9,52 @@ function connectToCCTV() {
         imgElement.style.display = 'block';
         cctvContainer.style.display = 'flex';
 
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-
-        setInterval(() => {
-            canvas.width = imgElement.width;
-            canvas.height = imgElement.height;
-            context.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
-
-            const frameData = canvas.toDataURL('image/jpeg').split(',')[1];
-
-            fetch('/cctv_infer', {
-                method: 'POST',
-                body: JSON.stringify({
-                    frame: frameData,
-                    width: canvas.width,
-                    height: canvas.height
-                }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        console.error(data.error);
-                        return;
-                    }
-
-                    if (data.results) {
-                        detectionInfo.innerHTML = '';
-                        data.results.forEach(result => {
-                            detectionInfo.innerHTML += `<p>Frame ${result.frame_id}: BBox ${result.bbox}, Conf ${result.confidence}</p>`;
-                        });
-                    } else {
-                        detectionInfo.innerHTML = `<p>${data.message}</p>`;
-                    }
-                })
-                .catch(error => console.error(error));
-        }, 62);
+        startCapturingFrames(detectionInfo);
     } else {
         alert('Please enter a valid CCTV URL!');
         imgElement.style.display = 'none';
         cctvContainer.style.display = 'none';
     }
+}
+
+function startCapturingFrames(detectionInfo) {
+    setInterval(() => {
+        captureFrame(detectionInfo);
+    }, 400);
+}
+
+function captureFrame(detectionInfo) {
+    const video = document.getElementById('cctv-stream');
+    const canvas = document.createElement('canvas');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    const dataURL = canvas.toDataURL('image/png');
+    console.log(`Canvas Dimensions: ${canvas.width}x${canvas.height}`);
+    console.log(`Video Dimensions: ${video.videoWidth}x${video.videoHeight}`);
+    console.log(dataURL);
+    sendFrameToServer(dataURL, detectionInfo);
+}
+
+function sendFrameToServer(dataURL, detectionInfo) {
+    fetch('/cctv_infer', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ frame: dataURL }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        detectionInfo.innerHTML += `<br>${data.result}`;
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
 }
 
 function uploadVideo() 
@@ -103,4 +94,15 @@ function uploadVideo()
     .catch(error => {
         statusDiv.innerHTML = `<p style="color: red;">Error: ${error}</p>`;
     });
+}
+
+function switchContent(contentId) 
+{
+    var contentDivs = document.querySelectorAll('.content');
+    contentDivs.forEach(function(div) 
+    {
+        div.style.display = 'none';
+    });
+    var selectedContent = document.getElementById(contentId);
+    selectedContent.style.display = 'block';
 }
