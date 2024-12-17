@@ -48,8 +48,10 @@ html, body {
     width: calc(100% - 175px);
     height: calc(100vh - 2px);
     box-sizing: border-box;
-    display: flex;
+/*    display: block;*/
+display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 .form-container {
@@ -93,7 +95,7 @@ html, body {
 
 #uploaded-video {
 	max-width: 100%;
-	height: auto;
+    max-height: 480px !important;
 }
 
 form {
@@ -125,9 +127,21 @@ form button:hover {
     background-color: #0056b3;
 }
 
-#upload-status p {
-    color: green;
-    margin: auto;
-    width: 50%;
-    text-align: center;
+video-container {
+    width: 100%;
+}
+
+#video-prediction {
+    display: none;
+    max-width: 35%;
+    text-align: center;  
+    margin: 0 auto;
+}
+
+#video-prediction p {
+    margin: 0;
+    padding: 10px;
+    display: flex;
+    justify-content: center;  /* Centering content inside the paragraph */
+    align-items: center;
 }

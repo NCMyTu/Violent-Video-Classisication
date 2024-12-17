@@ -10,8 +10,8 @@
 
 <body>
     <div class="sidenav">
-        <a href="#" onclick="switchContent('cctv')">Monitoring CCTV</a>
-        <a href="#" onclick="switchContent('classification')">Video Classification</a>
+        <a href="#" onclick="switchContent('cctv', this)">Monitoring CCTV</a>
+        <a href="#" onclick="switchContent('classification', this)">Video Classification</a>
     </div>
 
     <div class="content" id="cctv" style="display:block;">
@@ -27,27 +27,30 @@
             <div class="cctv">
                 <img id="cctv-stream" alt="CCTV Stream" style="width:640px; height:480px;">
             </div>
-            <div class="detection-info">
-                <p style="line-height: 1;"></p>
+            <div class="detection-info" style="overflow-y: scroll">
+                <p style="line-height: 1.2;"></p>
             </div>
         </div>
     </div>
 
-    <div class="content" id="classification" style="display:none;">
+    <center class="content" id="classification" style="display:none;">
         <div class="form-container">
             <form id="upload-form">
                 <input type="file" id="video-file" name="video" accept="video/*">
                 <button type="button" onclick="uploadVideo()">Upload</button>
+                <button type="button" onclick="predictVideo()">Predict</button>
             </form>
         </div>
-        <div id="upload-status" style="margin: auto; width: 50%; padding:"></div>
-        <div id="uploaded-video-container" style="display:none;">
+        <div id="video-prediction">
+            <p></p>
+        </div>
+        <div id="uploaded-video-container" style="display:none;" class="video-container">
             <video id="uploaded-video" controls width="720" height="480">
                 <source id="uploaded-video-source" src="" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
-    </div>
+    </center>
 
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
