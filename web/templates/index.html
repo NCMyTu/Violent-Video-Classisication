@@ -17,17 +17,18 @@
     <div class="content" id="cctv" style="display:block;">
         <div class="form-container">
             <form>
-                <input type="text" id="textbox" name="cctv_url" placeholder="CCTV URL here...">
+                <input type="text" id="cctv_url" placeholder="CCTV URL here...">
                 <button type="button" onclick="connectToCCTV()">Connect</button>
+                <button type="button" onclick="disconnectCCTV()">Disconnect</button>
             </form>
         </div>
 
         <div class="cctv-container">
             <div class="cctv">
-                <img id="cctv-stream" src="" alt="CCTV Stream" style="width:720px; height:520px;">
+                <img id="cctv-stream" alt="CCTV Stream" style="width:640px; height:480px;">
             </div>
             <div class="detection-info">
-                <p style="line-height: 0.5;"></p>
+                <p style="line-height: 1;"></p>
             </div>
         </div>
     </div>
@@ -48,6 +49,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 

@@ -1,60 +1,59 @@
+const socket = io.connect(window.location.origin);
+// const socket = io.connect("http://localhost:5000")
+const thresh = 0.5
+
+socket.on('update_frame', function (data) {
+    const imgElement = document.getElementById('cctv-stream');
+    const confidenceElement = document.querySelector('.detection-info p');
+
+    const imageBlob = new Blob([data.image], {type: 'image/jpeg'});
+    const imageUrl = URL.createObjectURL(imageBlob);
+    imgElement.src = imageUrl;
+    
+    if (data.confidence !== null) 
+    {
+        if (data.confidence >= thresh) 
+        {
+            confidenceElement.innerHTML += `<br>Confidence: ${data.confidence.toFixed(4)}, ${data.timestamp}`;
+        }
+        console.log(data.confidence.toFixed(4), data.timestamp)
+    }
+});
+
 function connectToCCTV() {
-    const url = document.getElementById('textbox').value.trim();
+    const url = document.getElementById('cctv_url').value.trim();
     const imgElement = document.getElementById('cctv-stream');
     const cctvContainer = document.querySelector('.cctv-container');
-    const detectionInfo = document.querySelector('.detection-info p');
 
     if (url) {
-        imgElement.src = url;
+        console.log("url: ", url)
+        socket.emit('start_cctv', { stream_url: url });
+
         imgElement.style.display = 'block';
         cctvContainer.style.display = 'flex';
-
-        startCapturingFrames(detectionInfo);
     } else {
-        alert('Please enter a valid CCTV URL!');
-        imgElement.style.display = 'none';
-        cctvContainer.style.display = 'none';
+        alert('Please enter a valid CCTV URL.');
     }
+    // socket.emit('start_cctv');
+
+    // imgElement.src = "http://192.168.1.49:4747/video";
+    // make the stream visible
+    // imgElement.style.display = 'block';
+    // cctvContainer.style.display = 'flex';
 }
 
-function startCapturingFrames(detectionInfo) {
-    setInterval(() => {
-        captureFrame(detectionInfo);
-    }, 400);
-}
+function disconnectCCTV()
+{
+    const imgElement = document.getElementById('cctv-stream');
+    const cctvContainer = document.querySelector('.cctv-container');
 
-function captureFrame(detectionInfo) {
-    const video = document.getElementById('cctv-stream');
-    const canvas = document.createElement('canvas');
+    imgElement.src = "";
+    // make the stream visible
+    imgElement.style.display = 'none';
+    cctvContainer.style.display = 'none';
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    const dataURL = canvas.toDataURL('image/png');
-    console.log(`Canvas Dimensions: ${canvas.width}x${canvas.height}`);
-    console.log(`Video Dimensions: ${video.videoWidth}x${video.videoHeight}`);
-    console.log(dataURL);
-    sendFrameToServer(dataURL, detectionInfo);
-}
-
-function sendFrameToServer(dataURL, detectionInfo) {
-    fetch('/cctv_infer', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ frame: dataURL }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        detectionInfo.innerHTML += `<br>${data.result}`;
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
+    socket.emit('stop_cctv');
+    console.log("disconnect")
 }
 
 function uploadVideo() 
