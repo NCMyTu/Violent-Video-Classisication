@@ -5,13 +5,13 @@ from tensorflow.keras import models, Sequential
 from tensorflow.keras.layers import Dense, Flatten, InputLayer
 from process_feature import resize_feature_to_n_rows
 
-def create_model(input_shape, fc1, fc2):
+def create_model(input_shape):
 	return Sequential([
 		InputLayer(input_shape=(32, 4096)),
 		Flatten(),
-		Dense(fc1, activation='relu'),
-		Dense(fc2, activation='relu'),
-		Dense(1, activation='sigmoid')
+		Dense(2048, activation="relu"),
+		Dense(512, activation="relu"),
+		Dense(1, activation="sigmoid")
 	])
 
 def get_tensor(path, label):

@@ -12,9 +12,11 @@ dataset = dataset.shuffle(buffer_size=10000)
 dataset = dataset.batch(32)
 
 input_shape = x[0].shape
-model = create_model(input_shape, 2048, 512)
+model = create_model(input_shape)
+# TODO: test with different lr, SGD, Lion
+# callback earlystopping
+# batch size
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 model.summary()
 
 model.fit(dataset, epochs=10)
-

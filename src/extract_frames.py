@@ -2,9 +2,9 @@ import cv2
 import shutil
 import os
 
-def extract_frames(video_path, FPS):
+def extract_frames(video_path, FPS=16, output_path="./frames"):
 	file_name = os.path.basename(video_path).split(".")[0]
-	save_dir = os.path.join("dataset", "extracted-frames", file_name)
+	save_dir = output_path
 	if os.path.isdir(save_dir):
 		shutil.rmtree(save_dir)
 	os.makedirs(save_dir)
@@ -27,5 +27,5 @@ def extract_frames(video_path, FPS):
 		print(f"extracted frame no.{count+1:05}")
 		count += 1
 
-video_path = r"dataset\violent\dailymail4.mp4"
-extract_frames(video_path, FPS=16)
+video_path = r"C:\Users\PC MY TU\Desktop\test.mp4"
+extract_frames(video_path)
