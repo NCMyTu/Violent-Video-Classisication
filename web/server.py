@@ -3,20 +3,12 @@ import time
 import sys
 import os
 import numpy as np
-import torch
-import tensorflow as tf
 from tensorflow.keras.models import load_model
-from torch.autograd import Variable
 from skimage.transform import resize
 from flask import Flask, render_template, request, jsonify, url_for
 from flask_socketio import SocketIO, emit
 from threading import Thread, Event
 import queue
-from collections import deque
-# sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
-# from process_feature import resize_feature_to_n_rows
-# from model import create_model
-# from C3D_model import C3D
 
 UPLOAD_FOLDER = './static/uploads'
 
@@ -28,28 +20,15 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 fps = 16
 BATCH_SIZE = fps * 1
 frame_time = 1 / fps
-crop_w = 64 # 112
-crop_h = 64 # 112
+crop_w = 64
+crop_h = 64
 frame_queue = queue.Queue()
 
 # thread control events
 stop_event = Event()
 
-# c3d = C3D(487)
-# classifier = create_model((32, 4096))
-# classifier.load_weights(r"C:\Users\PC MY TU\Desktop\CS420\trained_2048_512_2.weights.h5")
-mobi_lstm = load_model(r"C:\Users\PC MY TU\Desktop\Mobi_LSTM\mobi_lstm.keras")
-
-def extract_feature(imgs):
-	imgs = np.array(imgs, dtype="float32")
-	imgs = torch.from_numpy(np.float32(imgs.transpose(0, 4, 1, 2, 3)))
-	imgs = Variable(imgs)
-	_, batch_output = c3d(imgs, 6)
-	batch_feature  = (batch_output.data).cpu()
-	features = batch_feature.numpy()
-	features = resize_feature_to_n_rows(features)
-	features = tf.convert_to_tensor([features], dtype=tf.float32)
-	return features
+path = r"C:\Users\PC MY TU\Desktop\CS420\data\cnn_lstm.keras"
+cnn_lstm = load_model(path)
 
 def _predict_video(video_file_path, model):
 	SEQUENCE_LENGTH = 16
@@ -87,15 +66,10 @@ def process_features_worker():
 			if imgs is None:
 				break
 
-			# features = extract_feature(imgs)
-			# y_pred = classifier.predict(features)
-			# conf_score = y_pred[0][0]
-			# print(f"Confidence: {conf_score:.4f}")
-
 			imgs = np.array(imgs)
-			y_pred = mobi_lstm.predict(imgs, verbose=0)
+			y_pred = cnn_lstm.predict(imgs, verbose=0)
 			conf_score = np.max(y_pred[0])
-			prediction = int(np.argmax(y_pred)) # int64, wtf tf?
+			prediction = int(np.argmax(y_pred)) # int64, wtf tensorflow?
 
 			_, buffer = cv2.imencode('.jpg', imgs[-1][-1])
 			img_bytes = buffer.tobytes()
@@ -137,7 +111,6 @@ def cctv_processing(stream_url):
 		if len(frames) < BATCH_SIZE:
 			_, buffer = cv2.imencode('.jpg', frame)
 			img_bytes = buffer.tobytes()
-			# send image to frontend
 			socketio.emit('update_frame', {
 											'image': img_bytes, 
 											"is_prediction": False
@@ -176,7 +149,7 @@ def cctv_processing(stream_url):
 		time_to_wait = max(0, frame_time - elapsed_time)
 		time.sleep(time_to_wait)
 
-	cap.release()  # Release the camera resource
+	cap.release()  # release the camera
 	cv2.destroyAllWindows()
 	print("-----> CCTV stream disconnected")
 
@@ -210,7 +183,7 @@ def predict_video():
 	if not video_url:
 		return jsonify({"error": "Video URL is missing."}), 400
 
-	label, conf_score = _predict_video(video_url, mobi_lstm)
+	label, conf_score = _predict_video(video_url, cnn_lstm)
 
 	return jsonify({
 		"label": int(label),
@@ -238,10 +211,10 @@ def stop_cctv():
 	print("-----> Stopping CCTV stream")
 	
 	global stop_event
-	stop_event.set()  # set the stop event
+	stop_event.set() # set the stop event
 	
 	frame_queue.put(None)
 
 
 if __name__ == "__main__":
-	socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+	socketio.run(app, host="0.0.0.0", port=2, debug=True)

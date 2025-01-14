@@ -1,7 +1,0 @@
-python feature_extractor_vid.py -o ../cs420_project/extracted_features/video -i ../cs420_project/dataset/train/non-violent -p ../cs420_project/dataset/train_non_violent.txt --OUTPUT_NAME train_non_violent.hdf5
-
-
-python feature_extractor_frm.py -o ../cs420_project/extracted_features/frame -i ../cs420_project/dataset/extracted-frames -p ../cs420_project/list.txt
-
-
-python feature_extractor_vid.py -o "C:\Users\PC MY TU\Desktop\CS420\vid_feat" -i "C:\Users\PC MY TU\Desktop" -p "C:\Users\PC MY TU\Desktop\test.mp4" --OUTPUT_NAME out.hdf5
