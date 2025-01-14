@@ -6,6 +6,8 @@ from tensorflow.keras.models import load_model
 
 def frames_extraction(video_path):
 	SEQUENCE_LENGTH = 16
+	IMG_SIZE = 64
+
 	frames_list = []
 
 	video_reader = cv2.VideoCapture(video_path)
@@ -23,7 +25,7 @@ def frames_extraction(video_path):
 		if not success:
 			break
  
-		resized_frame = cv2.resize(frame, (64, 64))
+		resized_frame = cv2.resize(frame, (IMG_SIZE, IMG_SIZE))
 		
 		normalized_frame = resized_frame / 255
 		
@@ -67,3 +69,8 @@ y_pred = [predict(cnn_lstm, path) for path in violent_paths] + [predict(cnn_lstm
 
 accuracy = sum([1 for true, pred in zip(y, y_pred) if true == pred]) / len(y)
 print(f"Accuracy: {accuracy * 100:.2f}%")
+
+# focus on this case
+for i in range(len(violent_paths)):
+	if y[i] != y_pred[i]:
+		print(f"y: {y[i]}, y_pred: {y_pred[i]}, path: {violent_paths[i]}")
