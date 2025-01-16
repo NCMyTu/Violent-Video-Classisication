@@ -1,7 +1,7 @@
 # Violent Video Classification
 
 ## To train models: 
-Run 2 .ipynbfiles.
+Run 2 .ipynb files.
 
 ## To run demo:  
 First run this:
