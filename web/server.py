@@ -28,7 +28,7 @@ frame_queue = queue.Queue()
 # thread control events
 stop_event = Event()
 
-model_path = r"/app/web/static/cnn_lstm.keras"
+# model_path = r"/app/web/static/cnn_lstm.keras"
 model_path = r"./static/cnn_lstm.keras"
 cnn_lstm = load_model(model_path)
 
