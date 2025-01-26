@@ -10,6 +10,7 @@ from flask_socketio import SocketIO, emit
 from threading import Thread, Event
 import queue
 
+# UPLOAD_FOLDER = '/app/web/static/uploads'
 UPLOAD_FOLDER = './static/uploads'
 
 app = Flask(__name__)
@@ -27,8 +28,9 @@ frame_queue = queue.Queue()
 # thread control events
 stop_event = Event()
 
-path = r"C:\Users\PC MY TU\Desktop\CS420\data\cnn_lstm.keras"
-cnn_lstm = load_model(path)
+model_path = r"/app/web/static/cnn_lstm.keras"
+model_path = r"./static/cnn_lstm.keras"
+cnn_lstm = load_model(model_path)
 
 def _predict_video(video_file_path, model):
 	SEQUENCE_LENGTH = 16
@@ -217,4 +219,4 @@ def stop_cctv():
 
 
 if __name__ == "__main__":
-	socketio.run(app, host="0.0.0.0", port=2, debug=True)
+	socketio.run(app, host="0.0.0.0", port=8091, debug=True, allow_unsafe_werkzeug=True)

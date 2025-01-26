@@ -1,0 +1,7 @@
+Flask==3.0.3
+Flask_SocketIO==5.4.1
+numpy==1.26.4
+opencv_contrib_python==4.10.0.84
+opencv_python==4.10.0.84
+scikit-image==0.23.2
+tensorflow==2.16.2
