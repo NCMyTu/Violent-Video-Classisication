@@ -10,11 +10,11 @@ from flask_socketio import SocketIO, emit
 from threading import Thread, Event
 import queue
 
-# UPLOAD_FOLDER = '/app/web/static/uploads'
-UPLOAD_FOLDER = './static/uploads'
+# UPLOAD_FOLDER = r"/app/web/static/uploads"
+UPLOAD_FOLDER = r"./static/uploads"
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
@@ -73,13 +73,13 @@ def process_features_worker():
 			conf_score = np.max(y_pred[0])
 			prediction = int(np.argmax(y_pred)) # int64, wtf tensorflow?
 
-			_, buffer = cv2.imencode('.jpg', imgs[-1][-1])
+			_, buffer = cv2.imencode(".jpg", imgs[-1][-1])
 			img_bytes = buffer.tobytes()
-			socketio.emit('update_frame', {
-											'image': img_bytes,
+			socketio.emit("update_frame", {
+											"image": img_bytes,
 											"is_prediction": True,
 											"prediction": prediction,
-											'confidence': float(conf_score),
+											"confidence": float(conf_score),
 											"timestamp": received_time
 											}
 						)
@@ -111,10 +111,10 @@ def cctv_processing(stream_url):
 			break
 		
 		if len(frames) < BATCH_SIZE:
-			_, buffer = cv2.imencode('.jpg', frame)
+			_, buffer = cv2.imencode(".jpg", frame)
 			img_bytes = buffer.tobytes()
-			socketio.emit('update_frame', {
-											'image': img_bytes, 
+			socketio.emit("update_frame", {
+											"image": img_bytes, 
 											"is_prediction": False
 											}
 						)
@@ -143,7 +143,7 @@ def cctv_processing(stream_url):
 			frame_queue.put((imgs, current_time))
 			frames = []
 
-		if cv2.waitKey(1) & 0xFF == ord('q'):
+		if cv2.waitKey(1) & 0xFF == ord("q"):
 			break
 
 		# wait to match the exact frame time
@@ -159,28 +159,28 @@ def cctv_processing(stream_url):
 def index():
 	return render_template("index.html")
 
-@app.route('/upload_video', methods=['POST'])
+@app.route("/upload_video", methods=["POST"])
 def upload_file():
-	if 'video' not in request.files:
+	if "video" not in request.files:
 		return jsonify({"error": "No file part"}), 400
 
-	file = request.files['video']
-	if file.filename == '':
+	file = request.files["video"]
+	if file.filename == "":
 		return jsonify({"error": "No selected file"}), 400
 
 	filename = file.filename
-	file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+	file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 	file.save(file_path)
 	
 	return jsonify({
 		"message": "File uploaded successfully!",
-		"video_url": url_for('static', filename=f'uploads/{filename}')
+		"video_url": url_for("static", filename=f"uploads/{filename}")
 	})
 
 @app.route("/predict_video", methods=["POST"])
 def predict_video():
 	data = request.get_json()
-	video_url = data.get('video_url')
+	video_url = data.get("video_url")
 
 	if not video_url:
 		return jsonify({"error": "Video URL is missing."}), 400
@@ -192,9 +192,9 @@ def predict_video():
 		"conf_score": float(conf_score)
 		})
 
-@socketio.on('start_cctv')
+@socketio.on("start_cctv")
 def start_cctv(data):
-	stream_url = data.get('stream_url')
+	stream_url = data.get("stream_url")
 	print(f"-----> Received stream URL: {stream_url}")
 
 	global stop_event
@@ -208,7 +208,7 @@ def start_cctv(data):
 	cctv_thread.daemon = True
 	cctv_thread.start()
 
-@socketio.on('stop_cctv')
+@socketio.on("stop_cctv")
 def stop_cctv():
 	print("-----> Stopping CCTV stream")
 	
