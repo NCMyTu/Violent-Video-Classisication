@@ -1,5 +1,5 @@
 # Violent Video Classification
-This project classifies CCTV videoes as violent or non-violent.
+This project classifies CCTV videoes as violent or non-violent and can detect violent behaviors in real-time CCTV footage. 
 
 ## To train models: 
 Run 2 `.ipynb` files in `src` directory.
